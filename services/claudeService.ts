@@ -105,11 +105,6 @@ You MUST respond with valid JSON in exactly this format:
             }
           ]
         });
-      } else if (doc.extractedText) {
-        content.push({
-          role: 'user',
-          content: `DOCUMENT CONTENT:\n${doc.extractedText}\n\n${prompt}`
-        });
       } else {
         let docText = "";
         try {
