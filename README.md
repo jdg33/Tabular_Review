@@ -3,14 +3,14 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/framework-React-61DAFB.svg)
-![AI](https://img.shields.io/badge/AI-Google%20Gemini-8E75B2.svg)
+![AI](https://img.shields.io/badge/AI-Claude-8E75B2.svg)
 
 An AI-powered document review workspace that transforms unstructured legal contracts into structured, queryable datasets. Designed for legal professionals, auditors, and procurement teams to accelerate due diligence and contract analysis.
 
 ## 🚀 Features
 
-- **AI-Powered Extraction**: Automatically extract key clauses, dates, amounts, and entities from PDFs using Google Gemini 2.5 Pro / 3.0.
-- **Direct PDF Processing**: Files are uploaded directly to Gemini's File API for native PDF understanding without conversion.
+- **AI-Powered Extraction**: Automatically extract key clauses, dates, amounts, and entities from PDFs using Claude Haiku 4.5.
+- **Direct PDF Processing**: Documents are processed locally and sent to Claude for analysis with native PDF understanding.
 - **Dynamic Schema**: Define columns with natural language prompts (e.g., "What is the governing law?").
 - **Verification & Citations**: Click any extracted cell to view the exact source quote from the document.
 - **Spreadsheet Interface**: A high-density, Excel-like grid for managing bulk document reviews.
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/b63026d8-3df6-48a8-bb4b-eb8f24d3a1ca
 ## 🛠 Tech Stack
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS
-- **AI Integration**: Google GenAI SDK (Gemini 2.5 Flash, 2.5 Pro, 3.0 Pro)
+- **AI Integration**: Anthropic Claude SDK (Claude Haiku 4.5)
 
 ## 📦 Getting Started
 
@@ -39,12 +39,14 @@ npm install
 ```
 
 ### 3. Configure API Key
-Create a `.env` file in the root directory:
+If using Bolt, configure your API key in the Secrets menu with the key name `ANTHROPIC_API_KEY`.
+
+For local development, create a `.env` file in the root directory:
 ```env
-VITE_GEMINI_API_KEY=your_google_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
 
-Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+Get your API key from [Anthropic Console](https://console.anthropic.com/)
 
 ### 4. Run
 ```bash

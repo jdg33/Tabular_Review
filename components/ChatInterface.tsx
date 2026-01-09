@@ -1,22 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bot, Send, X, User } from 'lucide-react';
 import { ChatMessage, DocumentFile, Column, ExtractionResult } from '../types';
-import { analyzeDataWithChat } from '../services/geminiService';
+import { analyzeDataWithChat } from '../services/claudeService';
 
 interface ChatInterfaceProps {
   documents: DocumentFile[];
   columns: Column[];
   results: ExtractionResult;
   onClose: () => void;
-  modelId: string;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   documents,
   columns,
   results,
-  onClose,
-  modelId
+  onClose
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -46,17 +44,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setIsTyping(true);
 
     try {
-      // Format history for Gemini
       const history = messages.map(m => ({
-        role: m.role,
-        parts: [{ text: m.text }]
+        role: m.role === 'model' ? 'assistant' as const : 'user' as const,
+        content: m.text
       }));
 
       const responseText = await analyzeDataWithChat(
         input,
         { documents, columns, results },
-        history,
-        modelId
+        history
       );
 
       const aiMsg: ChatMessage = {

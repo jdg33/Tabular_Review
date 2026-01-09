@@ -3,18 +3,11 @@ import { DataGrid } from './components/DataGrid';
 import { VerificationSidebar } from './components/VerificationSidebar';
 import { ChatInterface } from './components/ChatInterface';
 import { AddColumnMenu } from './components/AddColumnMenu';
-import { extractColumnData } from './services/geminiService';
-import { uploadFileToGemini } from './services/documentProcessor';
+import { extractColumnData } from './services/claudeService';
+import { processFileForClaude } from './services/documentProcessor';
 import { DocumentFile, Column, ExtractionResult, SidebarMode, ColumnType } from './types';
-import { MessageSquare, Table, Square, FilePlus, LayoutTemplate, ChevronDown, Zap, Cpu, Brain, Trash2, Play, Download, WrapText, Loader2 } from './components/Icons';
+import { MessageSquare, Square, FilePlus, LayoutTemplate, Trash2, Play, Download, WrapText, Loader2 } from './components/Icons';
 import { SAMPLE_COLUMNS } from './utils/sampleData';
-
-// Available Models
-const MODELS = [
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', description: 'Deepest Reasoning', icon: Brain },
-  { id: 'gemini-2.5-pro-preview', name: 'Gemini 2.5 Pro', description: 'Balanced', icon: Cpu },
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Fastest', icon: Zap },
-];
 
 const App: React.FC = () => {
   // State
@@ -32,10 +25,6 @@ const App: React.FC = () => {
   
   // Verification Sidebar Expansion State
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  
-  // Model State
-  const [selectedModel, setSelectedModel] = useState<string>(MODELS[0].id);
-  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 
   // Add/Edit Column Menu State
   const [addColumnAnchor, setAddColumnAnchor] = useState<DOMRect | null>(null);
@@ -66,23 +55,22 @@ const App: React.FC = () => {
         const processedFiles: DocumentFile[] = [];
 
         for (const file of fileList) {
-          const uploadedFile = await uploadFileToGemini(file);
+          const processedFile = await processFileForClaude(file);
 
           processedFiles.push({
             id: Math.random().toString(36).substring(2, 9),
             name: file.name,
             type: file.type,
             size: file.size,
-            content: '',
-            mimeType: uploadedFile.mimeType,
-            fileUri: uploadedFile.fileUri
+            content: processedFile.content,
+            mimeType: processedFile.mimeType
           });
         }
 
         setDocuments(prev => [...prev, ...processedFiles]);
     } catch (error) {
         console.error("Failed to process files:", error);
-        alert("Error uploading files to Gemini. Please check your API key and try again.");
+        alert("Error processing files. Please try again.");
     } finally {
         setIsConverting(false);
     }
@@ -284,7 +272,7 @@ const App: React.FC = () => {
       const promises = tasks.map(async ({ doc, col }) => {
           if (controller.signal.aborted) return;
           try {
-              const data = await extractColumnData(doc, col, selectedModel);
+              const data = await extractColumnData(doc, col);
               if (controller.signal.aborted) return;
 
               setResults(prev => ({
@@ -384,7 +372,6 @@ const App: React.FC = () => {
   };
 
   const sidebarData = getSidebarData();
-  const currentModel = MODELS.find(m => m.id === selectedModel) || MODELS[0];
 
   // Calculate Sidebar Width
   const getSidebarWidthClass = () => {
@@ -518,51 +505,6 @@ const App: React.FC = () => {
                 )}
              </button>
 
-             <div className="h-6 w-px bg-slate-200 mx-1"></div>
-
-             {/* Model Selector */}
-             <div className="relative">
-                <button 
-                onClick={() => !isProcessing && setIsModelMenuOpen(!isModelMenuOpen)}
-                disabled={isProcessing}
-                className={`flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100 transition-all ${!isProcessing ? 'hover:bg-indigo-100 active:scale-95' : 'opacity-60 cursor-not-allowed'}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <currentModel.icon className="w-3.5 h-3.5" />
-                    <span className="text-xs font-semibold">{currentModel.name}</span>
-                  </div>
-                  <ChevronDown className="w-3 h-3 opacity-60" />
-                </button>
-                
-                {isModelMenuOpen && (
-                  <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsModelMenuOpen(false)}></div>
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    {MODELS.map(model => (
-                      <button
-                        key={model.id}
-                        onClick={() => {
-                          setSelectedModel(model.id);
-                          setIsModelMenuOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors ${
-                          selectedModel === model.id ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-slate-50 text-slate-700'
-                        }`}
-                      >
-                        <div className={`p-1.5 rounded-md ${selectedModel === model.id ? 'bg-white shadow-sm' : 'bg-slate-100'}`}>
-                          <model.icon className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold">{model.name}</div>
-                          <div className="text-[10px] opacity-70">{model.description}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  </>
-                )}
-              </div>
-
              {/* Run / Stop Button */}
              {isProcessing ? (
                 <button 
@@ -597,8 +539,8 @@ const App: React.FC = () => {
                             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Uploading Documents</h3>
-                    <p className="text-slate-500">Uploading files to Gemini API for processing...</p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Processing Documents</h3>
+                    <p className="text-slate-500">Converting files for analysis...</p>
                 </div>
             </div>
           )}
@@ -622,12 +564,11 @@ const App: React.FC = () => {
 
           {/* Add/Edit Column Menu */}
           {addColumnAnchor && (
-            <AddColumnMenu 
+            <AddColumnMenu
               triggerRect={addColumnAnchor}
               onClose={handleCloseMenu}
               onSave={handleSaveColumn}
               onDelete={handleDeleteColumn}
-              modelId={selectedModel}
               initialData={editingColumnId ? columns.find(c => c.id === editingColumnId) : undefined}
             />
           )}
@@ -649,12 +590,11 @@ const App: React.FC = () => {
                     />
                 )}
                 {sidebarMode === 'chat' && (
-                    <ChatInterface 
+                    <ChatInterface
                         documents={documents}
                         columns={columns}
                         results={results}
                         onClose={() => setSidebarMode('none')}
-                        modelId={selectedModel}
                     />
                 )}
             </div>

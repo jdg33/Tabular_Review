@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ColumnType } from '../types';
-import { generatePromptHelper } from '../services/geminiService';
+import { generatePromptHelper } from '../services/claudeService';
 import { 
   X, 
   HelpCircle, 
@@ -29,7 +29,6 @@ interface AddColumnMenuProps {
   onClose: () => void;
   onSave: (col: { name: string; type: ColumnType; prompt: string }) => void;
   onDelete?: () => void;
-  modelId: string;
   initialData?: { name: string; type: ColumnType; prompt: string };
 }
 
@@ -38,7 +37,6 @@ export const AddColumnMenu: React.FC<AddColumnMenuProps> = ({
   onClose,
   onSave,
   onDelete,
-  modelId,
   initialData
 }) => {
   const [name, setName] = useState(initialData?.name || '');
@@ -65,10 +63,10 @@ export const AddColumnMenu: React.FC<AddColumnMenuProps> = ({
 
   const handleAiGeneratePrompt = async () => {
     if (!name) return;
-    
+
     setIsGeneratingPrompt(true);
     try {
-      const suggestion = await generatePromptHelper(name, type, prompt || undefined, modelId);
+      const suggestion = await generatePromptHelper(name, type, prompt || undefined);
       setPrompt(suggestion);
     } catch (e) {
       console.error("Failed to generate prompt", e);
