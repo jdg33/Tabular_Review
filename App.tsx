@@ -63,7 +63,8 @@ const App: React.FC = () => {
             type: file.type,
             size: file.size,
             content: processedFile.content,
-            mimeType: processedFile.mimeType
+            mimeType: processedFile.mimeType,
+            extractedText: processedFile.extractedText
           });
         }
 

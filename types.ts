@@ -5,6 +5,7 @@ export interface DocumentFile {
   size: number;
   content: string;
   mimeType: string;
+  extractedText?: string;
 }
 
 export type ColumnType = 'text' | 'number' | 'date' | 'boolean' | 'list';
