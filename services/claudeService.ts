@@ -87,7 +87,15 @@ You MUST respond with valid JSON in exactly this format:
   "reasoning": "brief explanation"
 }`;
 
-      if (doc.mimeType?.startsWith('image/') || doc.mimeType === 'application/pdf') {
+      const isDocumentType =
+        doc.mimeType?.startsWith('image/') ||
+        doc.mimeType === 'application/pdf' ||
+        doc.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        doc.mimeType === 'application/msword' ||
+        doc.mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        doc.mimeType === 'application/vnd.ms-excel';
+
+      if (isDocumentType) {
         content.push({
           role: 'user',
           content: [
