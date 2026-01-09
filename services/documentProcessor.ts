@@ -1,27 +1,37 @@
+import { GoogleGenAI } from "@google/genai";
 
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
-export const processDocumentToMarkdown = async (file: File): Promise<string> => {
+export interface ProcessedDocument {
+  fileUri: string;
+  mimeType: string;
+  displayName: string;
+}
+
+export const uploadFileToGemini = async (file: File): Promise<ProcessedDocument> => {
   try {
-    const formData = new FormData();
-    formData.append('file', file);
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Send to local backend running Docling
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    const response = await fetch(`${apiUrl}/convert`, {
-      method: 'POST',
-      body: formData,
+    const uploadedFile = await ai.files.upload({
+      file: {
+        data: uint8Array,
+        mimeType: file.type || 'application/octet-stream'
+      },
+      config: {
+        displayName: file.name
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`Conversion failed: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.markdown || "";
+    return {
+      fileUri: uploadedFile.uri,
+      mimeType: uploadedFile.mimeType,
+      displayName: uploadedFile.name
+    };
 
   } catch (error) {
-    console.error("Document Conversion failed:", error);
-    throw new Error(`Failed to convert ${file.name}. Is the backend server running?`);
+    console.error("File upload to Gemini failed:", error);
+    throw new Error(`Failed to upload ${file.name} to Gemini API`);
   }
 };
-

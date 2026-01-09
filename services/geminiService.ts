@@ -79,20 +79,25 @@ export const extractColumnData = async (
   return withRetry(async () => {
     try {
       const parts = [];
-      
-      // We assume doc.content is now ALWAYS text/markdown because we converted it locally on upload.
-      // Decode Base64 to get the text
-      let docText = "";
-      try {
-          docText = decodeURIComponent(escape(atob(doc.content)));
-      } catch (e) {
-          // Fallback
-          docText = atob(doc.content);
-      }
 
-      parts.push({
-        text: `DOCUMENT CONTENT:\n${docText}`,
-      });
+      if (doc.fileUri) {
+        parts.push({
+          fileData: {
+            mimeType: doc.mimeType,
+            fileUri: doc.fileUri
+          }
+        });
+      } else {
+        let docText = "";
+        try {
+            docText = decodeURIComponent(escape(atob(doc.content)));
+        } catch (e) {
+            docText = atob(doc.content);
+        }
+        parts.push({
+          text: `DOCUMENT CONTENT:\n${docText}`,
+        });
+      }
   
       // Format instruction based on column type
       let formatInstruction = "";

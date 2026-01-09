@@ -4,7 +4,7 @@ import { VerificationSidebar } from './components/VerificationSidebar';
 import { ChatInterface } from './components/ChatInterface';
 import { AddColumnMenu } from './components/AddColumnMenu';
 import { extractColumnData } from './services/geminiService';
-import { processDocumentToMarkdown } from './services/documentProcessor';
+import { uploadFileToGemini } from './services/documentProcessor';
 import { DocumentFile, Column, ExtractionResult, SidebarMode, ColumnType } from './types';
 import { MessageSquare, Table, Square, FilePlus, LayoutTemplate, ChevronDown, Zap, Cpu, Brain, Trash2, Play, Download, WrapText, Loader2 } from './components/Icons';
 import { SAMPLE_COLUMNS } from './utils/sampleData';
@@ -66,27 +66,23 @@ const App: React.FC = () => {
         const processedFiles: DocumentFile[] = [];
 
         for (const file of fileList) {
-          // Use local deterministic processor (markitdown style)
-          const markdownContent = await processDocumentToMarkdown(file);
-          
-          // Encode to Base64 to match our storage format (mimicking the sample data structure)
-          // This keeps the rest of the app (which expects base64 strings for "content") happy
-          const contentBase64 = btoa(unescape(encodeURIComponent(markdownContent)));
+          const uploadedFile = await uploadFileToGemini(file);
 
           processedFiles.push({
             id: Math.random().toString(36).substring(2, 9),
             name: file.name,
             type: file.type,
             size: file.size,
-            content: contentBase64,
-            mimeType: 'text/markdown' // Force to markdown so the viewer treats it as text
+            content: '',
+            mimeType: uploadedFile.mimeType,
+            fileUri: uploadedFile.fileUri
           });
         }
 
         setDocuments(prev => [...prev, ...processedFiles]);
     } catch (error) {
         console.error("Failed to process files:", error);
-        alert("Error processing some files. Please check if they are valid PDF, DOC, or DOCX documents.");
+        alert("Error uploading files to Gemini. Please check your API key and try again.");
     } finally {
         setIsConverting(false);
     }
@@ -601,8 +597,8 @@ const App: React.FC = () => {
                             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Converting Documents</h3>
-                    <p className="text-slate-500">Using local Docling engine to preserve formatting and structure...</p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Uploading Documents</h3>
+                    <p className="text-slate-500">Uploading files to Gemini API for processing...</p>
                 </div>
             </div>
           )}

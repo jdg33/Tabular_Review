@@ -10,9 +10,9 @@ An AI-powered document review workspace that transforms unstructured legal contr
 ## 🚀 Features
 
 - **AI-Powered Extraction**: Automatically extract key clauses, dates, amounts, and entities from PDFs using Google Gemini 2.5 Pro / 3.0.
-- **High-Fidelity Conversion**: Uses **Docling** (running locally) to convert PDFs and DOCX files to clean Markdown text, preserving formatting and structure without hallucination.
+- **Direct PDF Processing**: Files are uploaded directly to Gemini's File API for native PDF understanding without conversion.
 - **Dynamic Schema**: Define columns with natural language prompts (e.g., "What is the governing law?").
-- **Verification & Citations**: Click any extracted cell to view the exact source quote highlighted in the original document.
+- **Verification & Citations**: Click any extracted cell to view the exact source quote from the document.
 - **Spreadsheet Interface**: A high-density, Excel-like grid for managing bulk document reviews.
 - **Integrated Chat Analyst**: Ask questions across your entire dataset (e.g., "Which contract has the most favorable MFN clause?").
 
@@ -33,63 +33,25 @@ git clone https://github.com/yourusername/tabular-review.git
 cd tabular-review
 ```
 
-### 2. Setup Frontend
-Install Node dependencies:
+### 2. Install dependencies
 ```bash
-pnpm install
+npm install
 ```
 
-Create a `.env.local` file in the root directory for your Google API Key:
+### 3. Configure API Key
+Create a `.env` file in the root directory:
 ```env
 VITE_GEMINI_API_KEY=your_google_api_key_here
 ```
 
-### 3. Setup Backend (Docling)
-The backend is required for document conversion.
-
-```bash
-cd server
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
 ### 4. Run
-Start the backend (in one terminal):
 ```bash
-cd server
-source venv/bin/activate
-python main.py
+npm run dev
 ```
 
-Start the frontend (in another terminal):
-```bash
-pnpm dev
-```
-
-### 🐳 Docker Deployment (Alternative)
-
-You can also run the application using Docker:
-
-1. **Setup environment**:
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your Google Gemini API key
-   ```
-
-2. **Build and run with Docker**:
-   ```bash
-   docker-compose up --build
-   ```
-
-3. **Access the application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000/docs
-
-The Docker setup includes:
-- **Frontend**: React app served by Node.js static server
-- **Backend**: FastAPI with Docling document processing
-- **Simple networking**: Services communicate via Docker network
+The application will start at http://localhost:5173
 
 ## 🛡 License
 

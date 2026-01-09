@@ -3,8 +3,9 @@ export interface DocumentFile {
   name: string;
   type: string;
   size: number;
-  content: string; // Base64 string for PDF/Images, or raw text for TXT
+  content: string;
   mimeType: string;
+  fileUri?: string;
 }
 
 export type ColumnType = 'text' | 'number' | 'date' | 'boolean' | 'list';

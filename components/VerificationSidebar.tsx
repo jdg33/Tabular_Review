@@ -25,16 +25,17 @@ export const VerificationSidebar: React.FC<VerificationSidebarProps> = ({
   
   useEffect(() => {
     if (document) {
-        // Decode Base64 content (which is now always Markdown/Text from App.tsx)
+        if (!document.content || document.content === '') {
+            setDecodedContent("Document preview not available. Files are processed directly by Gemini API.");
+            return;
+        }
         try {
             const cleanContent = document.content.replace(/^data:.*;base64,/, '');
             const binaryString = atob(cleanContent);
             try {
-                // Handle UTF-8 characters properly
                 const decoded = decodeURIComponent(escape(binaryString));
                 setDecodedContent(decoded);
             } catch (e) {
-                // Fallback for simple ASCII or already decoded parts
                 setDecodedContent(binaryString);
             }
         } catch (e) {
