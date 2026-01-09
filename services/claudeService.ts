@@ -87,21 +87,7 @@ You MUST respond with valid JSON in exactly this format:
   "reasoning": "brief explanation"
 }`;
 
-      const supportedDocumentTypes = [
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'application/vnd.ms-powerpoint',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel',
-        'text/plain',
-        'text/html',
-        'text/csv',
-        'text/markdown'
-      ];
-
-      if (supportedDocumentTypes.includes(doc.mimeType)) {
+      if (doc.mimeType === 'application/pdf') {
         content.push({
           role: 'user',
           content: [
@@ -109,7 +95,7 @@ You MUST respond with valid JSON in exactly this format:
               type: 'document',
               source: {
                 type: 'base64',
-                media_type: doc.mimeType as any,
+                media_type: 'application/pdf',
                 data: doc.content
               }
             },
@@ -127,9 +113,9 @@ You MUST respond with valid JSON in exactly this format:
           docText = atob(doc.content);
         }
 
-        if (docText.length > 100000) {
+        if (docText.length > 80000) {
           console.warn(`Document ${doc.name} is very large (${docText.length} chars). Truncating to avoid token limit.`);
-          docText = docText.substring(0, 100000) + "\n\n[Document truncated due to size]";
+          docText = docText.substring(0, 80000) + "\n\n[Document truncated due to size - showing first 80,000 characters]";
         }
 
         content.push({
