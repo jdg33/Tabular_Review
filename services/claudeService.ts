@@ -3,9 +3,9 @@ import { DocumentFile, ExtractionCell, Column, ExtractionResult } from "../types
 
 const MODEL_ID = "claude-haiku-4-5-20251001";
 
-const apiKey = import.meta.env.ANTHROPIC_API_KEY;
+const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
 if (!apiKey) {
-  console.error("ANTHROPIC_API_KEY is not set in environment variables");
+  console.error("VITE_ANTHROPIC_API_KEY is not set in environment variables");
 }
 
 const anthropic = new Anthropic({
