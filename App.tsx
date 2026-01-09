@@ -86,7 +86,7 @@ const App: React.FC = () => {
         setDocuments(prev => [...prev, ...processedFiles]);
     } catch (error) {
         console.error("Failed to process files:", error);
-        alert("Error processing some files. Please check if they are valid PDF or DOCX documents.");
+        alert("Error processing some files. Please check if they are valid PDF, DOC, or DOCX documents.");
     } finally {
         setIsConverting(false);
     }
@@ -405,13 +405,13 @@ const App: React.FC = () => {
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Hidden File Input */}
-      <input 
-        type="file" 
+      <input
+        type="file"
         ref={fileInputRef}
         onChange={handleFileUpload}
         multiple
         className="hidden"
-        accept=".pdf,.txt,.md,.json,.docx"
+        accept=".pdf,.doc,.docx,.txt,.md,.json"
       />
 
       {/* Main Content Area */}
